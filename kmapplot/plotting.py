@@ -1,10 +1,10 @@
-import matplotlib
+"""
+Plotting helper functions
+"""
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
-import numpy as np
+import matplotlib
 import seaborn as sns
-
-from kmapplot.kmap import Kmap
+import numpy as np
 
 sns.set_style('whitegrid')
 
@@ -31,7 +31,7 @@ def fill_kmap_grid(ax: matplotlib.axes.Axes, kmap: list[list] | np.ndarray):
                 ax.text(
                     c + 0.5,
                     rows_n-r-0.5,
-                    str(kmap[r,c]),
+                    str(kmap[r][c]),
                     ha="center",
                     va="center",
                     fontsize=16
@@ -55,34 +55,3 @@ def gray_labels(ax, rows_n, gray_c, gray_r):
     for r, label in enumerate(gray_r):
         ax.text(-0.2, rows_n-r-0.5, label,
                 ha="right", va="center", fontsize=16)
-
-
-
-def main():
-
-    # with individual functions
-
-    kmap = np.array([[0, 1, 1,1], [0, 0 , 0, 0], [1, '-', 0, '-'], ['-', '-', '-', '-']])
-    variables = 'abcd'
-    rows_n = 4
-    gray_r = gray_c = ["00", "01", "11", "10"]
-
-
-    fig, ax = plt.subplots(figsize=(5,5))
-
-    plot_kmap_grid(ax = ax, kmap=kmap)
-    fill_kmap_grid(ax=ax, kmap=kmap)
-    variables_labels(ax=ax, variable_names=variables, row_var_n=2)
-    gray_labels(ax=ax, rows_n=rows_n, gray_c=gray_c, gray_r=gray_r)
-    ax.set_aspect("equal")
-    ax.axis("off")
-    plt.title('y', fontsize=18)
-    plt.show()
-
-    # directly with the Kmap method
-
-    kmap = Kmap(kmap=[[0, 1, 1,1], [0, 0 , 0, 0], [1, '-', 0, '-'], ['-', '-', '-', '-']])
-    kmap.plot()
-
-if __name__ == "__main__":
-    main()

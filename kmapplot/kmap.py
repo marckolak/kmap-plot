@@ -1,6 +1,9 @@
 from kmapplot.gray import gray_code
+from kmapplot.plotting import fill_kmap_grid,gray_labels,plot_kmap_grid,variables_labels
 from math import log2
 import string
+
+from matplotlib import pyplot as plt
 
 class Kmap:
 
@@ -96,5 +99,19 @@ class Kmap:
           
 
         pass
+
+
+    def plot(self):
+
+        fig, ax = plt.subplots(figsize=(5,5))
+
+        plot_kmap_grid(ax = ax, kmap=self.kmap)
+        fill_kmap_grid(ax=ax, kmap=self.kmap)
+        variables_labels(ax=ax, variable_names=self.variable_names, row_var_n=self.row_vars_n)
+        gray_labels(ax=ax, rows_n=len(self.kmap), gray_c=self.gray_cols, gray_r=self.gray_rows)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        plt.title('y', fontsize=18)
+        plt.show()
 
 
