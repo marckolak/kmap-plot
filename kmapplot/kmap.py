@@ -1,23 +1,28 @@
-from kmapplot.gray import gray_code
-from kmapplot.plotting import fill_kmap_grid,gray_labels,plot_kmap_grid,variables_labels
-from math import log2
 import string
+from math import log2
 
 from matplotlib import pyplot as plt
+
+from kmapplot.gray import gray_code
+from kmapplot.layout import KMapLayout
+from kmapplot.plotting import fill_kmap_grid, gray_labels, plot_kmap_grid, variables_labels
+
 
 class Kmap:
 
     def __init__(
-        self,
-        kmap: list[list] | None = None,
-        variables_n: int | None = None,
-        ones: list | None = None,
-        dont_cares: list | None = None,
-        variable_names: list | None = None
+            self,
+            kmap: list[list] | None = None,
+            variables_n: int | None = None,
+            ones: list | None = None,
+            dont_cares: list | None = None,
+            variable_names: list | None = None
     ):
 
         if not (kmap or variables_n):
             raise TypeError("You must specify either the number of variables or a K-map itself")
+
+        self.layout: KMapLayout | None = None
 
         # Kmap structure and values initialization
         if kmap:
@@ -25,33 +30,23 @@ class Kmap:
             self.col_vars_n = int(log2(len(self.kmap[0])))
             self.row_vars_n = int(log2(len(self.kmap)))
             self.variables_n = self.col_vars_n + self.row_vars_n
-
+            self.layout = KMapLayout(self.variables_n, self.row_vars_n)
 
         elif variables_n:
-            self.variables_n = variables_n
-            self.row_vars_n = variables_n //2
-            self.col_vars_n = variables_n - self.row_vars_n
-
-            n_cols = 2**self.col_vars_n
-            n_rows = 2**self.row_vars_n 
-
-            self.kmap = [[0] * n_cols for _ in range(n_rows)]
+            self.layout = KMapLayout(variables_n)
+            self.kmap = [[0] * self.layout.cols_n for _ in range(self.layout.rows_n)]
             # print(self.kmap)
             # self.impl_mapping = self.implicant_mapping(self.n_rows, self.n_cols)
             if ones:
                 for impl in ones:
                     self.kmap[0] = 1
 
-
         # Kmap labeling initialization
         if variable_names:
             self.variable_names = variable_names
         else:
-            self.variable_names = [string.ascii_lowercase[i] for i in range(self.variables_n)]
+            self.variable_names = [string.ascii_lowercase[i] for i in range(self.layout.variables_n)]
 
-        self.gray_rows = gray_code(self.row_vars_n)
-        self.gray_cols = gray_code(self.col_vars_n)
-        
 
     def __getitem__(self, key):
         return self.kmap[key]
@@ -76,45 +71,39 @@ class Kmap:
 
         return mapping_dict
 
-
     def print(self):
 
-        max_col_len = max(len(self.gray_cols[0]), len(''.join(self.variable_names+['/'])))
+        max_col_len = max(len(self.layout.gray_cols[0]), len(''.join(self.variable_names + ['/'])))
 
         row_width = self.row_vars_n
 
-
-        variable_names = ''.join(self.variable_names[:self.row_vars_n]) + ' \\ ' + ''.join(self.variable_names[self.row_vars_n:])
-        top_row = variable_names + ' | ' + ' | '.join(self.gray_cols)
-        column_len = len(self.gray_cols[0])
+        variable_names = ''.join(self.variable_names[:self.row_vars_n]) + ' \\ ' + ''.join(
+            self.variable_names[self.row_vars_n:])
+        top_row = variable_names + ' | ' + ' | '.join(self.layout.gray_cols)
+        column_len = len(self.layout.gray_cols[0])
 
         print(top_row)
-        print('-'*len(top_row))
+        print('-' * len(top_row))
 
-        for row, g in zip(self.kmap, self.gray_rows):
+        for row, g in zip(self.kmap, self.layout.gray_rows):
             row_str = f'{g:{''}^{len(variable_names)}}'
             print(row_str + ' | ' + ' | '.join([f'{c:{''}^{column_len}}' for c in row]))
-            print('-'*len(top_row))
-
-          
+            print('-' * len(top_row))
 
         pass
 
-
-    def plot(self, ax = None, show=False):
+    def plot(self, ax=None, show=False):
 
         if not ax:
-            fig, ax = plt.subplots(figsize=(5,5))
+            fig, ax = plt.subplots(figsize=(5, 5))
 
-        plot_kmap_grid(ax = ax, kmap=self.kmap)
+        plot_kmap_grid(ax=ax, kmap=self.kmap)
         fill_kmap_grid(ax=ax, kmap=self.kmap)
         variables_labels(ax=ax, variable_names=self.variable_names, row_var_n=self.row_vars_n)
-        gray_labels(ax=ax, rows_n=len(self.kmap), gray_c=self.gray_cols, gray_r=self.gray_rows)
+        gray_labels(ax=ax, rows_n=len(self.kmap), gray_c=self.layout.gray_cols, gray_r=self.layout.gray_rows)
         ax.set_aspect("equal")
         ax.axis("off")
         ax.figure.suptitle('y', fontsize=18)
 
         if show:
             plt.show()
-
-
