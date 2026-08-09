@@ -101,9 +101,10 @@ class Kmap:
         pass
 
 
-    def plot(self):
+    def plot(self, ax = None, show=False):
 
-        fig, ax = plt.subplots(figsize=(5,5))
+        if not ax:
+            fig, ax = plt.subplots(figsize=(5,5))
 
         plot_kmap_grid(ax = ax, kmap=self.kmap)
         fill_kmap_grid(ax=ax, kmap=self.kmap)
@@ -111,7 +112,9 @@ class Kmap:
         gray_labels(ax=ax, rows_n=len(self.kmap), gray_c=self.gray_cols, gray_r=self.gray_rows)
         ax.set_aspect("equal")
         ax.axis("off")
-        plt.title('y', fontsize=18)
-        plt.show()
+        ax.figure.suptitle('y', fontsize=18)
+
+        if show:
+            plt.show()
 
 

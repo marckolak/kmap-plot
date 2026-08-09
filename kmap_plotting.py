@@ -79,7 +79,7 @@ def main():
     plt.title('y', fontsize=18)
     plt.show()
 
-    # directly with the Kmap method
+    # directly with the Kmap
 
     kmap = Kmap(kmap=[[0, 1, 1,1], [0, 0 , 0, 0], [1, '-', 0, '-'], ['-', '-', '-', '-']])
     kmap.plot()
