@@ -57,6 +57,32 @@ class Kmap:
     def __len__(self):
         return len(self.kmap)
 
+    def __str__(self):
+
+        max_col_len = max(len(self.layout.gray_cols[0]), len(''.join(self.variable_names + ['/'])))
+
+        row_width = self.row_vars_n
+
+        lines = []
+
+        variable_names = ''.join(self.variable_names[:self.row_vars_n]) + ' \\ ' + ''.join(
+            self.variable_names[self.row_vars_n:])
+        top_row = variable_names + ' | ' + ' | '.join(self.layout.gray_cols)
+        column_len = len(self.layout.gray_cols[0])
+
+        lines.append(top_row)
+        lines.append('-' * len(top_row))
+
+        for row, g in zip(self.kmap, self.layout.gray_rows):
+            row_str = f'{g:{''}^{len(variable_names)}}'
+            lines.append(row_str + ' | ' + ' | '.join([f'{c:{''}^{column_len}}' for c in row]))
+            lines.append('-' * len(top_row))
+
+        return '\n'.join(lines)
+
+    def __repr__(self):
+        return self.__str__()
+
     def implicant_mapping(self, n_rows, n_cols) -> dict:
         gray_rows = gray_code(log2(n_rows))
         gray_cols = gray_code(log2(n_cols))
@@ -71,26 +97,7 @@ class Kmap:
 
         return mapping_dict
 
-    def print(self):
 
-        max_col_len = max(len(self.layout.gray_cols[0]), len(''.join(self.variable_names + ['/'])))
-
-        row_width = self.row_vars_n
-
-        variable_names = ''.join(self.variable_names[:self.row_vars_n]) + ' \\ ' + ''.join(
-            self.variable_names[self.row_vars_n:])
-        top_row = variable_names + ' | ' + ' | '.join(self.layout.gray_cols)
-        column_len = len(self.layout.gray_cols[0])
-
-        print(top_row)
-        print('-' * len(top_row))
-
-        for row, g in zip(self.kmap, self.layout.gray_rows):
-            row_str = f'{g:{''}^{len(variable_names)}}'
-            print(row_str + ' | ' + ' | '.join([f'{c:{''}^{column_len}}' for c in row]))
-            print('-' * len(top_row))
-
-        pass
 
     def plot(self, ax=None, show=False):
 
