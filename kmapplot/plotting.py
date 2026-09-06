@@ -1,57 +1,113 @@
 """
 Plotting helper functions
 """
+
+from matplotlib.colors import to_rgba
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 import numpy as np
+import matplotlib.patches as patches
+import matplotlib.path as mpath
+from kmapplot.layout import KMapLayout
 
-sns.set_style('whitegrid')
+sns.set_style("whitegrid")
+
 
 def plot_kmap_grid(ax: matplotlib.axes.Axes, kmap: list[list] | np.ndarray):
     rows_n, cols_n = len(kmap), len(kmap[0])
-    for i in range(0, rows_n+1):
-        ax.plot([0, cols_n], [i, i], color='k', linewidth=1)
+    for i in range(0, rows_n + 1):
+        ax.plot([0, cols_n], [i, i], color="k", linewidth=1)
 
-    for i in range(0, cols_n+1):
-        ax.plot([i, i], [0, rows_n], color='k', linewidth=1)
+    for i in range(0, cols_n + 1):
+        ax.plot([i, i], [0, rows_n], color="k", linewidth=1)
 
-
-    ax.plot([-.8,0], [rows_n+.8, rows_n], color='k', linewidth=1)
+    ax.plot([-0.8, 0], [rows_n + 0.8, rows_n], color="k", linewidth=1)
 
     # ax.plot([0, 0], [0, rows+0.5], color='k', linewidth=2)
     # ax.plot([-0.5,cols], [rows, rows], color='k', linewidth=2)
 
     return ax
 
+
 def fill_kmap_grid(ax: matplotlib.axes.Axes, kmap: list[list] | np.ndarray):
     rows_n, cols_n = len(kmap), len(kmap[0])
     for r in range(rows_n):
-            for c in range(cols_n):
-                ax.text(
-                    c + 0.5,
-                    rows_n-r-0.5,
-                    str(kmap[r][c]),
-                    ha="center",
-                    va="center",
-                    fontsize=16
-                )
+        for c in range(cols_n):
+            ax.text(
+                c + 0.5,
+                rows_n - r - 0.5,
+                str(kmap[r][c]),
+                ha="center",
+                va="center",
+                fontsize=16,
+            )
+
 
 def variables_labels(ax, variable_names, row_var_n):
     rows = int(2**row_var_n)
     # variables
-    ax.text(-0.6, rows + 0.3, ''.join(variable_names[:row_var_n]),
-                fontsize=16, horizontalalignment='right')
+    ax.text(
+        -0.6,
+        rows + 0.3,
+        "".join(variable_names[:row_var_n]),
+        fontsize=16,
+        horizontalalignment="right",
+    )
 
-    ax.text(-0.3, rows + 0.55, ''.join(variable_names[row_var_n:]),
-                fontsize=16, horizontalalignment='left')
+    ax.text(
+        -0.3,
+        rows + 0.55,
+        "".join(variable_names[row_var_n:]),
+        fontsize=16,
+        horizontalalignment="left",
+    )
+
 
 def gray_labels(ax, rows_n, gray_c, gray_r):
-    
+
     for c, label in enumerate(gray_c):
-        ax.text(c+0.5, rows_n+0.15, label,
-                ha="center", fontsize=16)
+        ax.text(c + 0.5, rows_n + 0.15, label, ha="center", fontsize=16)
 
     for r, label in enumerate(gray_r):
-        ax.text(-0.2, rows_n-r-0.5, label,
-                ha="right", va="center", fontsize=16)
+        ax.text(-0.2, rows_n - r - 0.5, label, ha="right", va="center", fontsize=16)
+
+
+def cell_group_patch(
+    group: list[tuple[int, int]], color, n_rows, label: str = "", pad: float = 0.15
+):
+    rows = [c[0] for c in group]
+    cols = [c[1] for c in group]
+
+    min_row, max_row = min(rows), max(rows)
+    min_col, max_col = min(cols), max(cols)
+
+    # Calculate bottom-left origin in Matplotlib space
+    x = min_col
+    y = n_rows - max_row - 1
+
+    width = max_col - min_col + 1
+    height = max_row - min_row + 1
+
+    # Apply padding to keep lines slightly inside cell borders
+    x_padded = x + pad
+    y_padded = y + pad
+    width_padded = width - (2 * pad)
+    height_padded = height - (2 * pad)
+
+    # Use alpha RGBA tuple for single-patch fill and border rendering
+    face_color = to_rgba(color, alpha=0.25)
+
+    rect = patches.FancyBboxPatch(
+        (x_padded, y_padded),
+        width_padded,
+        height_padded,
+        boxstyle="round,pad=0.05,rounding_size=0.15",
+        linewidth=2,
+        edgecolor=color,
+        facecolor=face_color,
+        zorder=3,
+        label=label,
+    )
+
+    return rect

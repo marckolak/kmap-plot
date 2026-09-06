@@ -92,3 +92,5 @@ class Kmap:
 
         if show:
             plt.show()
+
+        return ax
